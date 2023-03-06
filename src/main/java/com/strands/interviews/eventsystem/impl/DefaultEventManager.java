@@ -3,8 +3,12 @@ package com.strands.interviews.eventsystem.impl;
 import com.strands.interviews.eventsystem.EventManager;
 import com.strands.interviews.eventsystem.InterviewEvent;
 import com.strands.interviews.eventsystem.InterviewEventListener;
+import com.strands.interviews.eventsystem.events.GeneralEvent;
+import com.strands.interviews.eventsystem.events.SimpleEvent;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Manages the firing and receiving of events.
@@ -26,13 +30,29 @@ public class DefaultEventManager implements EventManager
             System.err.println("Null event fired?");
             return;
         }
-
-        sendEventTo(event, calculateListeners(event.getClass()));
+        Collection listeners = calculateListeners(event.getClass());
+        
+        sendEventTo(event, listeners);
     }
 
     private Collection calculateListeners(Class eventClass)
     {
-        return (Collection) listenersByClass.get(eventClass);
+    	Collection collection = (Collection) listenersByClass.get(eventClass);
+
+    	return addGeneralListeners(collection);
+    }
+    private Collection addGeneralListeners(Collection specificListeners)
+    {
+    	Collection generalListeners = (Collection) listenersByClass.get(GeneralEvent.class);
+    	
+    	if(generalListeners == null || generalListeners.isEmpty())
+    		return specificListeners;
+    	if(specificListeners == null || specificListeners.isEmpty())
+    		return generalListeners;
+    	
+    	specificListeners.add(generalListeners);
+    	
+    	return specificListeners;
     }
 
     public void registerListener(String listenerKey, InterviewEventListener listener)
@@ -47,10 +67,14 @@ public class DefaultEventManager implements EventManager
             unregisterListener(listenerKey);
 
         Class[] classes = listener.getHandledEventClasses();
-
+        
+        if(classes.length == 0) {
+        	addToListenerList(GeneralEvent.class, listener);
+        }
+        
         for (int i = 0; i < classes.length; i++)
             addToListenerList(classes[i], listener);
-
+        
         listeners.put(listenerKey, listener);
     }
 

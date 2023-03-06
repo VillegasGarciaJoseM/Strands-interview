@@ -122,10 +122,28 @@ public class DefaultEventManagerTest
     	eventManager.registerListener("some.key", eventListenerMock);
     	eventManager.registerListener("another.key", eventListenerMock2);
 
-        eventManager.publishEvent(new SimpleEvent(this));        
         eventManager.publishEvent(new SubEvent(this));
         
-        assertTrue(eventListenerMock.isCalled());
         assertFalse(eventListenerMock2.isCalled());
     }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testAllEventsListenerCreation() 
+    {
+    	EventListenerMock eventListenerMock = new EventListenerMock(new Class[]{});
+
+    	eventManager.registerListener("last.key", eventListenerMock);
+    	
+        eventManager.publishEvent(new SimpleEvent(this));  
+        assertTrue(eventListenerMock.isCalled());
+        
+        eventListenerMock.resetCalled();
+        
+        eventManager.publishEvent(new SubEvent(this));        
+        assertTrue(eventListenerMock.isCalled());
+    }
+
 }
