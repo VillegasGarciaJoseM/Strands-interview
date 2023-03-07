@@ -33,6 +33,32 @@ public class DefaultEventManager implements EventManager
         }
         Collection listeners = calculateListeners(event.getClass());
         
+        listeners = concatenateAllEventListeners(listeners);
+        
+        listeners = concatenateParentEventListeners(listeners, event.getClass());
+        
+        sendEventTo(event, listeners);
+    }
+
+    private Collection concatenateParentEventListeners(Collection listeners, Class aClass) {
+		Collection classes = (Collection) listenersByClass.keySet();
+		
+    	for(Object o : classes) {
+    		Class c = (Class) o;
+    		
+    		if(c.isAssignableFrom(aClass) && !c.equals(aClass))
+    			listeners.addAll(calculateListeners(c));	
+    	}
+		return listeners;
+	}
+
+	private Collection calculateListeners(Class eventClass)
+    {
+    	return (Collection) listenersByClass.get(eventClass);
+    }
+
+    private Collection concatenateAllEventListeners(Collection listeners) 
+    {
         if(allEventListeners != null) {
         	if(listeners != null) {
         		listeners.addAll(allEventListeners);
@@ -40,16 +66,9 @@ public class DefaultEventManager implements EventManager
         		listeners = allEventListeners;
         	}
         }
-        
-        sendEventTo(event, listeners);
+        return listeners;
     }
-
-    private Collection calculateListeners(Class eventClass)
-    {
-    	return (Collection) listenersByClass.get(eventClass);
-
-    }
-
+    
     public void registerListener(String listenerKey, InterviewEventListener listener)
     {
         if (listenerKey == null || listenerKey.equals(""))

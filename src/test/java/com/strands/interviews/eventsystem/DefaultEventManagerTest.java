@@ -114,7 +114,7 @@ public class DefaultEventManagerTest
      * Listeners of SimpleEvent should not listen to SubEvent event type
      */
     @Test
-    public void testDoNotNotifyParentListeners() 
+    public void testNotifyParentListeners() 
     {
     	EventListenerMock eventListenerMock = new EventListenerMock(new Class[]{SubEvent.class});
     	EventListenerMock eventListenerMock2 = new EventListenerMock(new Class[]{SimpleEvent.class});
@@ -124,7 +124,8 @@ public class DefaultEventManagerTest
 
         eventManager.publishEvent(new SubEvent(this));
         
-        assertFalse(eventListenerMock2.isCalled());
+        assertTrue(eventListenerMock.isCalled());
+        assertTrue(eventListenerMock2.isCalled());
     }
     
     /**
@@ -134,16 +135,23 @@ public class DefaultEventManagerTest
     public void testAllEventsListenerCreation() 
     {
     	EventListenerMock eventListenerMock = new EventListenerMock(new Class[]{});
+    	EventListenerMock eventListenerMock2 = new EventListenerMock(new Class[]{SubEvent.class});
 
-    	eventManager.registerListener("last.key", eventListenerMock);
-    	
-        eventManager.publishEvent(new SimpleEvent(this));  
+    	eventManager.registerListener("some.key", eventListenerMock);
+    	eventManager.registerListener("another.key", eventListenerMock2);
+
+        eventManager.publishEvent(new SimpleEvent(this)); 
+        
         assertTrue(eventListenerMock.isCalled());
+        assertFalse(eventListenerMock2.isCalled());
+        
         
         eventListenerMock.resetCalled();
         
-        eventManager.publishEvent(new SubEvent(this));        
+        eventManager.publishEvent(new SubEvent(this));  
+        
         assertTrue(eventListenerMock.isCalled());
+        assertTrue(eventListenerMock2.isCalled());
     }
 
 }
