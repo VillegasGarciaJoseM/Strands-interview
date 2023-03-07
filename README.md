@@ -24,3 +24,8 @@ INNER JOIN ACCOUNT a ON t.ACCOUNT_ID = a.ID
 WHERE a.USER_ID = {user_id}
 AND MONTH(t.POSTED_DATE) = MONTH(CURRENT_DATE)
 AND t.AMOUNT > 0
+
+Task 6 
+
+a) ^[a-zA-Z]+\.[a-zA-Z]+@strands\.com$
+b) ^[A-Z][0-9]\\[0-9}\\{0-9}
